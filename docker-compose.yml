@@ -1,0 +1,18 @@
+services:
+  nginx:
+    image: nginx:1.27.0-alpine-slim
+    networks:
+      - rag_network
+  
+  nginx2:
+    image: nginx:1.27.0-alpine-slim
+    networks:
+      - rag_network
+
+
+networks:
+  rag_network:
+    driver: bridge
+
+
+  
