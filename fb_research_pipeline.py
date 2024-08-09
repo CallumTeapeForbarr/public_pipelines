@@ -40,7 +40,7 @@ class Pipeline:
         # This function is called when the server is started.
         # global client, embedding_function, db, reranking_function, model
         #https://docs.trychroma.com/reference/py-client
-        self.client = chromadb.HttpClient(host="http://localhost",port="8000", ssl=False)
+        self.client = chromadb.HttpClient(host="localhost",port="8000", ssl=False)
 
         #https://api.python.langchain.com/en/latest/embeddings/langchain_huggingface.embeddings.huggingface.HuggingFaceEmbeddings.html
         self.embedding_function = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
