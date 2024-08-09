@@ -91,8 +91,6 @@ class Pipeline:
 
         context =''.join(doc["text"]+"\n" for doc in reranked)
 
-        return context
-
         messages =  [
                 ("system", f"""
                         You are an expert consultant helping financial advisors to get relevant information from market research reports.
@@ -111,5 +109,8 @@ class Pipeline:
                 ("user", f"CONTEXT: {context}\nQUERY: {user_message}")
             ]
         
-        return self.model.invoke(messages).content
+        response = self.model.invoke(messages)
+
+
+        return "got response?" 
 
