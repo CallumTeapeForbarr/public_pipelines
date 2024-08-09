@@ -78,8 +78,9 @@ class Pipeline:
         # This is where you can add your custom RAG pipeline.
         # Typically, you would retrieve relevant information from your knowledge base and synthesize it to generate a response.
 
-        return "olympics"
         docs = self.db.similarity_search(user_message,k=30)
+
+
 
         reranked = self.reranking_function.rank(
             user_message,
@@ -89,6 +90,8 @@ class Pipeline:
         )
 
         context =''.join(doc["text"]+"\n" for doc in reranked)
+
+        return context
 
         messages =  [
                 ("system", f"""
