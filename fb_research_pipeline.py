@@ -107,12 +107,24 @@ class Pipeline:
         context =''.join(doc["text"]+"\n" for doc in reranked)
 
 
+        payload = {
+            "model": "qwen2:1.5b",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": prompt,
+                },
+                {"role": "user", "content": f"CONTEXT: {context}\nQUERY: {user_message}"},
+            ],
+            "stream": body["stream"],
+        }
+
 
         #https://github.com/ollama/ollama/blob/main/docs/api.md
         try:
             r = requests.post(
                 url=f"http://ollama:11434/v1/chat/completions",
-                json={"messages": [{"system": prompt, "user": f"CONTEXT:{context}\nQUERY:{user_message}"}], "model": "qwen2:1.5b"},
+                json=payload,
                 stream=True
             )
 
