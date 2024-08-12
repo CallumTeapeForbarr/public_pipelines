@@ -79,6 +79,20 @@ class Pipeline:
         # This is where you can add your custom RAG pipeline.
         # Typically, you would retrieve relevant information from your knowledge base and synthesize it to generate a response.
 
+        prompt = """
+                You are an expert consultant helping financial advisors to get relevant information from market research reports.
+
+                Use the context given below to answer the advisors questions.
+        
+                The context will be a series of excerpts from market research reports. They may not belong to the same report. 
+                Please prioritise the most recent. Please prioritise actual data over forecast where applicable.
+                
+                Constraints:
+                1. Only use the context given to answer.
+                2. Do not make any statements which aren't verifiable from this context. 
+                2. Try to answer in one or two concise paragraphs
+            """
+
         docs = self.db.similarity_search(user_message,k=30)
 
 
@@ -92,10 +106,13 @@ class Pipeline:
 
         context =''.join(doc["text"]+"\n" for doc in reranked)
 
+
+
+
         try:
             r = requests.post(
                 url=f"http://ollama:11434/v1/chat/completions",
-                json={**body, "model": "gemma2:2b"},
+                json={"messages": [{"system": prompt, "content": f"CONTEXT:{context}\nQUERY:{user_message}"}], "model": "qwen2:1.5b"},
                 stream=True,
             )
 
