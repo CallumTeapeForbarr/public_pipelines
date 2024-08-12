@@ -2,12 +2,13 @@
 title: Custom RAG Pipeline
 author: callum
 description: A pipeline for retrieving relevant information from a chroma db using langchain.
-requirements: langchain_text_splitters,langchain_community,langchain_huggingface,chromadb,langchain_chroma,flask,transformers,pypdf,tiktoken
+requirements: langchain_text_splitters,langchain_community,langchain_huggingface,chromadb,langchain_chroma,flask,transformers,pypdf,tiktoken,requests
 """
 
 from typing import List, Union, Generator, Iterator
 import os
 import asyncio
+import requests
 
 
 class Pipeline:
@@ -57,14 +58,14 @@ class Pipeline:
             trust_remote_code=True
         )
 
-        self.model = ChatOllama(
-            base_url="ollama", 
-            model="gemma2:2b",
-            num_ctx=4096,
-            num_gpus=0,
-            verbose=True,
-            keep_alive=-1   #keep the model loaded in memory
-        ) 
+        # self.model = ChatOllama(
+        #     base_url="ollama", 
+        #     model="gemma2:2b",
+        #     num_ctx=4096,
+        #     num_gpus=0,
+        #     verbose=True,
+        #     keep_alive=-1   #keep the model loaded in memory
+        # ) 
 
         pass
 
@@ -91,26 +92,47 @@ class Pipeline:
 
         context =''.join(doc["text"]+"\n" for doc in reranked)
 
-        messages =  [
-                ("system", f"""
-                        You are an expert consultant helping financial advisors to get relevant information from market research reports.
+        try:
+            r = requests.post(
+                url=f"http://ollama:11434/v1/chat/completions",
+                json={**body, "model": "gemma2:2b"},
+                stream=True,
+            )
 
-                        Use the context given below to answer the advisors questions.
+            r.raise_for_status()
+
+            if body["stream"]:
+                return r.iter_lines()
+            else:
+                return r.json()
+        except Exception as e:
+            return f"Error: {e}"
+
+        # curl http://localhost:11434/api/generate -d '{
+        #     "model": "llama3.1",
+        #     "prompt":"Why is the sky blue?"
+        #     }
+
+        # messages =  [
+        #         ("system", f"""
+        #                 You are an expert consultant helping financial advisors to get relevant information from market research reports.
+
+        #                 Use the context given below to answer the advisors questions.
                 
-                        The context will be a series of excerpts from market research reports. They may not belong to the same report. 
-                        Please prioritise the most recent. Please prioritise actual data over forecast where applicable.
+        #                 The context will be a series of excerpts from market research reports. They may not belong to the same report. 
+        #                 Please prioritise the most recent. Please prioritise actual data over forecast where applicable.
                         
-                        Constraints:
-                        1. Only use the context given to answer.
-                        2. Do not make any statements which aren't verifiable from this context. 
-                        2. Try to answer in one or two concise paragraphs
-                        """
-                ),
-                ("user", f"CONTEXT: {context}\nQUERY: {user_message}")
-            ]
+        #                 Constraints:
+        #                 1. Only use the context given to answer.
+        #                 2. Do not make any statements which aren't verifiable from this context. 
+        #                 2. Try to answer in one or two concise paragraphs
+        #                 """
+        #         ),
+        #         ("user", f"CONTEXT: {context}\nQUERY: {user_message}")
+        #     ]
         
-        response = self.model.invoke(messages)
+        # response = self.model.invoke(messages)
 
 
-        return "got response?" 
+        # return "got response?" 
 
