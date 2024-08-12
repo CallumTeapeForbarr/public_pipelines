@@ -93,14 +93,14 @@ class Pipeline:
                 2. Try to answer in one or two concise paragraphs
             """
 
-        docs = self.db.similarity_search(user_message,k=30)
+        docs = self.db.similarity_search(user_message,k=20)
 
 
 
         reranked = self.reranking_function.rank(
             user_message,
             [doc.page_content for doc in docs],
-            top_k=5,
+            top_k=3,
             return_documents=True
         )
 
