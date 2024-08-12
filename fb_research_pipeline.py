@@ -112,8 +112,9 @@ class Pipeline:
         try:
             r = requests.post(
                 url=f"http://ollama:11434/v1/chat/completions",
-                json={"messages": [{"system": prompt, "content": f"CONTEXT:{context}\nQUERY:{user_message}"}], "model": "qwen2:1.5b"},
+                json={"messages": [{"system": prompt, "user": f"CONTEXT:{context}\nQUERY:{user_message}"}], "model": "qwen2:1.5b", "stream": true, "keep_alive":-1,  "num_ctx": 4096},
                 stream=True,
+                keep_alive=-1
             )
 
             r.raise_for_status()
