@@ -108,7 +108,7 @@ class Pipeline:
 
 
         payload = {
-            "model": "qwen2:1.5b",
+            "model": "qwen2:0.5b",
             "messages": [
                 {
                     "role": "system",
