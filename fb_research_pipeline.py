@@ -10,8 +10,6 @@ import os
 import asyncio
 import requests
 
-#OLD requirements: langchain_text_splitters,langchain_community,langchain_huggingface,chromadb,langchain_chroma,flask,transformers,pypdf,tiktoken,requests
-
 class Pipeline:
 
     def __init__(self):
