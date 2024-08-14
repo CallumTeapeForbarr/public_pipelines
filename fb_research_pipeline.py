@@ -95,7 +95,7 @@ class Pipeline:
         # docs = self.db.similarity_search(user_message,k=30)
         docs = self.collection.query(query_embeddings=embedded_query,include=["documents","distances","metadatas"],n_results=20)
 
-        reranked = self.cross_encoder.rank(
+        reranked = self.reranking_function.rank(
             user_message,
             #[doc.page_content for doc in docs],
             docs["documents"][0],
