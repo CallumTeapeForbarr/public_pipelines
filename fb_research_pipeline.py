@@ -2,7 +2,7 @@
 title: Custom RAG Pipeline
 author: callum
 description: A pipeline for retrieving relevant information from a chroma db using langchain.
-requirements: langchain_text_splitters,langchain_community,langchain_huggingface,chromadb,langchain_chroma,flask,transformers,pypdf,tiktoken,requests
+requirements: chromadb, sentence_transformers,requests
 """
 
 from typing import List, Union, Generator, Iterator
@@ -10,11 +10,13 @@ import os
 import asyncio
 import requests
 
+#OLD requirements: langchain_text_splitters,langchain_community,langchain_huggingface,chromadb,langchain_chroma,flask,transformers,pypdf,tiktoken,requests
 
 class Pipeline:
 
     def __init__(self):
-        self.db = None
+        #self.db = None
+        self.collection = None
         self.client = None
         self.embedding_function = None
         self.reranking_function = None
@@ -24,16 +26,14 @@ class Pipeline:
     async def on_startup(self):
 
         #models
-        from langchain_huggingface import HuggingFaceEmbeddings #embedding model
+        #from langchain_huggingface import HuggingFaceEmbeddings #embedding model
         from sentence_transformers import CrossEncoder  #reranking model
+        from sentence_transformers import SentenceTransformer
 
         #imports for vectordb
         import chromadb
         #from langchain_community.vectorstores import Chroma
-        from langchain_chroma import Chroma
-
-        #imports for LLM querying
-        from langchain_community.chat_models import ChatOllama
+        # from langchain_chroma import Chroma
 
         EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
         RERANKING_MODEL = "BAAI/bge-reranker-large"
@@ -42,36 +42,33 @@ class Pipeline:
         # global client, embedding_function, db, reranking_function, model
         #https://docs.trychroma.com/reference/py-client
         self.client = chromadb.HttpClient(host="chroma",port="8000", ssl=False)
+        self.collection = self.client.get_or_create_collection(name="research")
 
         #https://api.python.langchain.com/en/latest/embeddings/langchain_huggingface.embeddings.huggingface.HuggingFaceEmbeddings.html
-        self.embedding_function = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+        #self.embedding_function = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 
         #https://python.langchain.com/v0.2/docs/integrations/vectorstores/chroma/
-        self.db = Chroma(
-            client=self.client,
-            collection_name="research",
-            embedding_function=self.embedding_function,
+        # self.db = Chroma(
+        #     client=self.client,
+        #     collection_name="research",
+        #     embedding_function=self.embedding_function,
+        # )
+
+        self.embedding_function = SentenceTransformer(
+            EMBEDDING_MODEL
         )
 
         self.reranking_function = CrossEncoder(
             RERANKING_MODEL,
             trust_remote_code=True
         )
-
-        # self.model = ChatOllama(
-        #     base_url="ollama", 
-        #     model="gemma2:2b",
-        #     num_ctx=4096,
-        #     num_gpus=0,
-        #     verbose=True,
-        #     keep_alive=-1   #keep the model loaded in memory
-        # ) 
-
         pass
+
 
     async def on_shutdown(self):
         # This function is called when the server is stopped.
         pass
+
 
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
@@ -93,14 +90,16 @@ class Pipeline:
                 2. Try to answer in one or two concise paragraphs
             """
 
-        docs = self.db.similarity_search(user_message,k=20)
+        embedded_query = self.embedding_function.encode([user_message])
 
+        # docs = self.db.similarity_search(user_message,k=30)
+        docs = self.collection.query(query_embeddings=embedded_query,include=["documents","distances","metadatas"],n_results=20)
 
-
-        reranked = self.reranking_function.rank(
+        reranked = self.cross_encoder.rank(
             user_message,
-            [doc.page_content for doc in docs],
-            top_k=3,
+            #[doc.page_content for doc in docs],
+            docs["documents"][0],
+            top_k=5,
             return_documents=True
         )
 
@@ -119,7 +118,6 @@ class Pipeline:
             "stream": body["stream"],
         }
 
-
         #https://github.com/ollama/ollama/blob/main/docs/api.md
         try:
             r = requests.post(
@@ -137,31 +135,4 @@ class Pipeline:
         except Exception as e:
             return f"Error: {e}"
 
-        # curl http://localhost:11434/api/generate -d '{
-        #     "model": "llama3.1",
-        #     "prompt":"Why is the sky blue?"
-        #     }
-
-        # messages =  [
-        #         ("system", f"""
-        #                 You are an expert consultant helping financial advisors to get relevant information from market research reports.
-
-        #                 Use the context given below to answer the advisors questions.
-                
-        #                 The context will be a series of excerpts from market research reports. They may not belong to the same report. 
-        #                 Please prioritise the most recent. Please prioritise actual data over forecast where applicable.
-                        
-        #                 Constraints:
-        #                 1. Only use the context given to answer.
-        #                 2. Do not make any statements which aren't verifiable from this context. 
-        #                 2. Try to answer in one or two concise paragraphs
-        #                 """
-        #         ),
-        #         ("user", f"CONTEXT: {context}\nQUERY: {user_message}")
-        #     ]
-        
-        # response = self.model.invoke(messages)
-
-
-        # return "got response?" 
 
