@@ -103,7 +103,7 @@ class Pipeline:
 
         context ="\n\n NEW CONTEXT".join(doc["text"] for doc in reranked)
 
-        return context
+        return context.replace('\n','')
 
 
         payload = {
