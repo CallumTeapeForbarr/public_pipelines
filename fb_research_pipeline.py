@@ -2,7 +2,7 @@
 title: Custom RAG Pipeline
 author: callum
 description: A pipeline for retrieving relevant information from a chroma db using langchain.
-requirements: chromadb, sentence_transformers,requests
+requirements: chromadb, sentence_transformers,requests,numpy
 """
 
 from typing import List, Union, Generator, Iterator
@@ -23,6 +23,7 @@ class Pipeline:
 
     async def on_startup(self):
 
+        import numpy as np
         #models
         #from langchain_huggingface import HuggingFaceEmbeddings #embedding model
         from sentence_transformers import CrossEncoder  #reranking model
@@ -68,6 +69,12 @@ class Pipeline:
         pass
 
 
+    def get_company(user_message):
+        company = user_message.split(";")[0]
+        return company
+
+
+
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
         ) -> Union[str, Generator, Iterator]:
@@ -87,8 +94,26 @@ class Pipeline:
                 2. Do not make any statements which aren't verifiable from this context. 
                 2. Try to answer in one or two concise paragraphs
             """
+        
+        company_list = np.array(["AIA", "AFT", "RYM"])
 
-        embedded_query = self.embedding_function.encode([user_message])
+        company = user_message.split(';')[0]
+
+        embedding=self.embedding_function.encode([user_message])
+
+        embedding = embedding[0]
+
+        cond = (company_list == company)
+        company_encode = np.where(cond,1,0)
+
+        print(company_encode)
+
+        company_embed = np.concatenate([np.full(len(embedding), fill_value=0), company_encode])
+        text_embed = np.concatenate([embedding, np.full(len(company_encode), fill_value=0)])
+
+        embedded_query = [(company_embed+text_embed).tolist()]
+
+        # embedded_query = self.embedding_function.encode([user_message])
 
         # docs = self.db.similarity_search(user_message,k=30)
         docs = self.collection.query(query_embeddings=embedded_query,include=["documents","distances","metadatas"],n_results=20)
