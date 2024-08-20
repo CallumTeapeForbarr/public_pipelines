@@ -101,9 +101,17 @@ class Pipeline:
             return_documents=True
         )
 
-        context ="\n\n NEW CONTEXT".join(doc["text"] for doc in reranked)
+        context = ""
+        for doc in reranked:
+            context += doc["text"].replace('\n', '')
+            context += '\n'
 
-        return context.replace('\n','')
+
+        # no_ns = [doc["text"].replace('\n', '') for doc in reranked]
+
+        # context ="\n".join(doc["text"] for doc in reranked)
+
+        return context
 
 
         payload = {
