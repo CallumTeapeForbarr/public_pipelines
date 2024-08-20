@@ -101,7 +101,7 @@ class Pipeline:
             return_documents=True
         )
 
-        context =''.join(doc["text"]+"\n" for doc in reranked)
+        context ='\n\n'.join(doc["text"] for doc in reranked)
 
         return context
 
