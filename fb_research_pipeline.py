@@ -9,6 +9,7 @@ from typing import List, Union, Generator, Iterator
 import os
 import asyncio
 import requests
+import numpy as np
 
 class Pipeline:
 
@@ -23,7 +24,6 @@ class Pipeline:
 
     async def on_startup(self):
 
-        import numpy
         #models
         #from langchain_huggingface import HuggingFaceEmbeddings #embedding model
         from sentence_transformers import CrossEncoder  #reranking model
@@ -95,7 +95,7 @@ class Pipeline:
                 2. Try to answer in one or two concise paragraphs
             """
         
-        company_list = numpy.array(["AIA", "AFT", "RYM"])
+        company_list = np.array(["AIA", "AFT", "RYM"])
 
         company = user_message.split(';')[0]
 
@@ -104,12 +104,12 @@ class Pipeline:
         embedding = embedding[0]
 
         cond = (company_list == company)
-        company_encode = numpy.where(cond,1,0)
+        company_encode = np.where(cond,1,0)
 
         print(company_encode)
 
-        company_embed = numpy.concatenate([numpy.full(len(embedding), fill_value=0), company_encode])
-        text_embed = numpy.concatenate([embedding, numpy.full(len(company_encode), fill_value=0)])
+        company_embed = np.concatenate([np.full(len(embedding), fill_value=0), company_encode])
+        text_embed = np.concatenate([embedding, np.full(len(company_encode), fill_value=0)])
 
         embedded_query = [(company_embed+text_embed).tolist()]
 
