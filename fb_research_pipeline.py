@@ -103,6 +103,8 @@ class Pipeline:
 
         context =''.join(doc["text"]+"\n" for doc in reranked)
 
+        return context
+
 
         payload = {
             "model": "qwen2:1.5b",
