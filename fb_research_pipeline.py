@@ -95,7 +95,7 @@ class Pipeline:
                 2. Try to answer in one or two concise paragraphs
             """
         
-        company_list = np.array(["AIA", "AFT", "RYM"])
+        company_list = np.array(['OCA', 'IKE', 'IPL', 'TWR', 'MHM', 'FRW', 'SML', 'CVT', 'KPG', 'NPH', 'AIR', 'AFT', 'HLG', 'ARV', 'VSL', 'RAD', 'WIN', 'SKO', 'SCL', 'PEB', 'ATM', 'VHP', 'NZM', 'PCT', 'RAK', 'SCT', 'TRA'])
 
         company = user_message.split(';')[0]
 
