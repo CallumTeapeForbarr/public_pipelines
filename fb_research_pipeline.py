@@ -115,7 +115,6 @@ class Pipeline:
 
         # embedded_query = self.embedding_function.encode([user_message])
 
-        # docs = self.db.similarity_search(user_message,k=30)
         docs = self.collection.query(query_embeddings=embedded_query,include=["documents","distances","metadatas"],n_results=20)
 
         reranked = self.reranking_function.rank(
@@ -128,7 +127,9 @@ class Pipeline:
 
         context = ""
         for doc in reranked:
-            context += doc["text"].replace('\n', ' ')
+
+            # context += doc["text"].replace('\n', ' ')
+            context += doc["corpus_id"]
             context += '\n'
 
 
