@@ -129,7 +129,7 @@ class Pipeline:
         for doc in reranked:
 
             # context += doc["text"].replace('\n', ' ')
-            context += doc["corpus_id"]
+            context += str(doc["corpus_id"])
             context += '\n'
 
 
