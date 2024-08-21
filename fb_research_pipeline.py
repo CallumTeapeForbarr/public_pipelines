@@ -97,10 +97,13 @@ class Pipeline:
         
         company_list = np.array(['OCA', 'IKE', 'IPL', 'TWR', 'MHM', 'FRW', 'SML', 'CVT', 'KPG', 'NPH', 'AIR', 'AFT', 'HLG', 'ARV', 'VSL', 'RAD', 'WIN', 'SKO', 'SCL', 'PEB', 'ATM', 'VHP', 'NZM', 'PCT', 'RAK', 'SCT', 'TRA'])
 
-        company = user_message.split(';')[0]
+        company, query = user_message.split(';')
 
-        embedding=self.embedding_function.encode([user_message])
+        embedded_query=self.embedding_function.encode([query])
 
+
+        """
+        FOR ONE HOT ENCODING COMPANY INTO EMBEDDING
         embedding = embedding[0]
 
         cond = (company_list == company)
@@ -114,8 +117,13 @@ class Pipeline:
         embedded_query = [(company_embed+text_embed).tolist()]
 
         # embedded_query = self.embedding_function.encode([user_message])
+        """
 
-        docs = self.collection.query(query_embeddings=embedded_query,include=["documents","distances","metadatas"],n_results=20)
+        docs = self.collection.query(
+            query_embeddings=embedded_query,
+            include=["documents","distances","metadatas"],
+            where = {'company': company},
+            n_results=15)
 
         reranked = self.reranking_function.rank(
             user_message,
@@ -127,15 +135,8 @@ class Pipeline:
 
         context = ""
         for doc in reranked:
-
-            # context += doc["text"].replace('\n', ' ')
-            context += str(doc)
+            context += doc["text"].replace('\n', ' ')
             context += '\n'
-
-
-        # no_ns = [doc["text"].replace('\n', '') for doc in reranked]
-
-        # context ="\n".join(doc["text"] for doc in reranked)
 
         return context
 
