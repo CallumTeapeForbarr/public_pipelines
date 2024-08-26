@@ -155,6 +155,7 @@ class Pipeline:
         try:
             r = requests.post(
                 url=f"http://ollama:11434/v1/chat/completions",
+                options = {'num_ctx': 100},
                 json=payload,
                 stream=True
             )
