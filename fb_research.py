@@ -37,8 +37,10 @@ class Pipeline:
         # global client, embedding_function, db, reranking_function, model
         #https://docs.trychroma.com/reference/py-client
         self.client = chromadb.HttpClient(host="chroma",port="8000", ssl=False)
-        self.research_collection = self.client.get_or_create_collection(name="research")
+        # self.research_collection = self.client.get_or_create_collection(name="research")
         self.data_collection = self.client.get_or_create_collection(name="data")
+
+        print(self.data_collection.count())
 
 
         self.embedding_function = SentenceTransformer(
@@ -79,13 +81,13 @@ class Pipeline:
         
         company, query = user_message.split(';')
 
-        embedded_query=self.embedding_function.encode([query])
+        # embedded_query=self.embedding_function.encode([query])
 
-        docs = self.research_collection.query(
-            query_embeddings=embedded_query,
-            include=["documents","distances","metadatas"],
-            where = {'company': company},
-            n_results=15)
+        # docs = self.research_collection.query(
+        #     query_embeddings=embedded_query,
+        #     include=["documents","distances","metadatas"],
+        #     where = {'company': company},
+        #     n_results=15)
         
         data = self.data_collection.query(
             query_embeddings=[0],
