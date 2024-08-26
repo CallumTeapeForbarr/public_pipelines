@@ -38,7 +38,7 @@ class Pipeline:
         #https://docs.trychroma.com/reference/py-client
         self.client = chromadb.HttpClient(host="chroma",port="8000", ssl=False)
         self.research_collection = self.client.get_or_create_collection(name="research")
-        # self.data_collection = self.client.get_or_create_collection(name="data")
+        self.data_collection = self.client.get_or_create_collection(name="data")
 
 
         self.embedding_function = SentenceTransformer(
