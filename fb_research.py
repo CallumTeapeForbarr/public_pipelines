@@ -102,7 +102,7 @@ class Pipeline:
             n_results=1
         )
 
-        facts = data["documents"][0]
+        facts = data["documents"][0][0]
 
         context = ""
         for doc in reranked:
