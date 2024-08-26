@@ -1,7 +1,7 @@
 """
-title: no pipeline?
+title: fb_research  
 author: callum
-description: no pipeline?
+description: fb research pipeline
 requirements: chromadb, sentence_transformers,requests,numpy
 """
 
@@ -37,11 +37,8 @@ class Pipeline:
         # global client, embedding_function, db, reranking_function, model
         #https://docs.trychroma.com/reference/py-client
         self.client = chromadb.HttpClient(host="chroma",port="8000", ssl=False)
-        # self.research_collection = self.client.get_or_create_collection(name="research")
+        self.research_collection = self.client.get_or_create_collection(name="research")
         self.data_collection = self.client.get_or_create_collection(name="data")
-
-        print(self.data_collection.count())
-
 
         self.embedding_function = SentenceTransformer(
             EMBEDDING_MODEL
@@ -87,7 +84,8 @@ class Pipeline:
             query_embeddings=embedded_query,
             include=["documents","distances","metadatas"],
             where = {'company': company},
-            n_results=15)
+            n_results=15
+        )
         
         reranked = self.reranking_function.rank(
             user_message,
@@ -104,6 +102,7 @@ class Pipeline:
             n_results=1
         )
 
+        facts = data["documents"][0]
 
         context = ""
         for doc in reranked:
@@ -116,11 +115,14 @@ class Pipeline:
             "messages": [
                 {
                     "role": "system",
-                    "content": prompt,
+                    "content": prompt
                 },
-                {"role": "user", "content": f"DATA: {data['documents'][0]}\nCONTEXT: {context}\nQUERY: {user_message}"},
+                {
+                    "role": "user", 
+                    "content": f"DATA: {facts}\nCONTEXT: {context}\nQUERY: {user_message}"
+                }
             ],
-            "stream": body["stream"],
+            "stream": body["stream"]
         }
 
         #https://github.com/ollama/ollama/blob/main/docs/api.md
