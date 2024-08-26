@@ -130,6 +130,7 @@ class Pipeline:
             r = requests.post(
                 url=f"http://ollama:11434/v1/chat/completions",
                 json=payload,
+                options={'num_ctx': 4096},
                 stream=True
             )
 
