@@ -128,7 +128,6 @@ class Pipeline:
             "stream": body["stream"]
         }
 
-        return str(payload)
 
         #https://github.com/ollama/ollama/blob/main/docs/api.md
         try:
