@@ -1,7 +1,7 @@
 """
-title: Custom RAG Pipeline
+title: no pipeline?
 author: callum
-description: A pipeline for retrieving relevant information from a chroma db using langchain.
+description: no pipeline?
 requirements: chromadb, sentence_transformers,requests,numpy
 """
 
@@ -9,7 +9,6 @@ from typing import List, Union, Generator, Iterator
 import os
 import asyncio
 import requests
-import numpy as np
 
 class Pipeline:
 
@@ -58,12 +57,6 @@ class Pipeline:
         pass
 
 
-    def get_company(user_message):
-        company = user_message.split(";")[0]
-        return company
-
-
-
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
         ) -> Union[str, Generator, Iterator]:
@@ -102,46 +95,4 @@ class Pipeline:
         )
 
         return data["documents"][0]
-
-        reranked = self.reranking_function.rank(
-            user_message,
-            #[doc.page_content for doc in docs],
-            docs["documents"][0],
-            top_k=5,
-            return_documents=True
-        )
-
-        context = ""
-        for doc in reranked:
-            context += doc["text"].replace('\n', ' ')
-            context += '\n'
-
-        payload = {
-            "model": "qwen2:1.5b",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": prompt,
-                },
-                {"role": "user", "content": f"DATA: {data["documents"][0]}\n, CONTEXT: {context}\nQUERY: {user_message}"},
-            ],
-            "stream": body["stream"],
-        }
-
-        #https://github.com/ollama/ollama/blob/main/docs/api.md
-        try:
-            r = requests.post(
-                url=f"http://ollama:11434/v1/chat/completions",
-                json=payload,
-                stream=True
-            )
-
-            r.raise_for_status()
-
-            if body["stream"]:
-                return r.iter_lines()
-            else:
-                return r.json()
-        except Exception as e:
-            return f"Error: {e}"
 
