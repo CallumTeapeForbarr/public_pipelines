@@ -122,7 +122,7 @@ class Pipeline:
                     "role": "system",
                     "content": prompt,
                 },
-                {"role": "user", "content": f"DATA: {data["documents"][0]}, CONTEXT: {context}\nQUERY: {user_message}"},
+                {"role": "user", "content": f"DATA: {data["documents"][0]}\n, CONTEXT: {context}\nQUERY: {user_message}"},
             ],
             "stream": body["stream"],
         }
