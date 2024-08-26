@@ -14,7 +14,6 @@ import numpy as np
 class Pipeline:
 
     def __init__(self):
-        #self.db = None
         self.collection = None
         self.client = None
         self.embedding_function = None
@@ -25,14 +24,11 @@ class Pipeline:
     async def on_startup(self):
 
         #models
-        #from langchain_huggingface import HuggingFaceEmbeddings #embedding model
         from sentence_transformers import CrossEncoder  #reranking model
         from sentence_transformers import SentenceTransformer
 
         #imports for vectordb
         import chromadb
-        #from langchain_community.vectorstores import Chroma
-        # from langchain_chroma import Chroma
 
         EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
         RERANKING_MODEL = "BAAI/bge-reranker-large"
@@ -43,15 +39,6 @@ class Pipeline:
         self.client = chromadb.HttpClient(host="chroma",port="8000", ssl=False)
         self.collection = self.client.get_or_create_collection(name="research")
 
-        #https://api.python.langchain.com/en/latest/embeddings/langchain_huggingface.embeddings.huggingface.HuggingFaceEmbeddings.html
-        #self.embedding_function = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-
-        #https://python.langchain.com/v0.2/docs/integrations/vectorstores/chroma/
-        # self.db = Chroma(
-        #     client=self.client,
-        #     collection_name="research",
-        #     embedding_function=self.embedding_function,
-        # )
 
         self.embedding_function = SentenceTransformer(
             EMBEDDING_MODEL
@@ -100,24 +87,6 @@ class Pipeline:
         company, query = user_message.split(';')
 
         embedded_query=self.embedding_function.encode([query])
-
-
-        """
-        FOR ONE HOT ENCODING COMPANY INTO EMBEDDING
-        embedding = embedding[0]
-
-        cond = (company_list == company)
-        company_encode = np.where(cond,1,0)
-
-        print(company_encode)
-
-        company_embed = np.concatenate([np.full(len(embedding), fill_value=0), company_encode])
-        text_embed = np.concatenate([embedding, np.full(len(company_encode), fill_value=0)])
-
-        embedded_query = [(company_embed+text_embed).tolist()]
-
-        # embedded_query = self.embedding_function.encode([user_message])
-        """
 
         docs = self.collection.query(
             query_embeddings=embedded_query,

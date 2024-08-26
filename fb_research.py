@@ -101,7 +101,7 @@ class Pipeline:
             n_results=1
         )
 
-        return data
+        return data["documents"][0]
 
         reranked = self.reranking_function.rank(
             user_message,
