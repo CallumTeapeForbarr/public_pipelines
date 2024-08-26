@@ -114,7 +114,7 @@ class Pipeline:
         payload = {
             "model": "qwen2:1.5b",
             "options": {
-                "num_ctx": 10
+                "num_ctx": 4096
             },
             "messages": [
                 {
