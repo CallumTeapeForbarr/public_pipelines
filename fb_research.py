@@ -43,14 +43,14 @@ class Pipeline:
         print(self.data_collection.count())
 
 
-        # self.embedding_function = SentenceTransformer(
-        #     EMBEDDING_MODEL
-        # )
+        self.embedding_function = SentenceTransformer(
+            EMBEDDING_MODEL
+        )
 
-        # self.reranking_function = CrossEncoder(
-        #     RERANKING_MODEL,
-        #     trust_remote_code=True
-        # )
+        self.reranking_function = CrossEncoder(
+            RERANKING_MODEL,
+            trust_remote_code=True
+        )
         pass
 
 
@@ -81,13 +81,21 @@ class Pipeline:
         
         company, query = user_message.split(';')
 
-        # embedded_query=self.embedding_function.encode([query])
+        embedded_query=self.embedding_function.encode([query])
 
-        # docs = self.research_collection.query(
-        #     query_embeddings=embedded_query,
-        #     include=["documents","distances","metadatas"],
-        #     where = {'company': company},
-        #     n_results=15)
+        docs = self.research_collection.query(
+            query_embeddings=embedded_query,
+            include=["documents","distances","metadatas"],
+            where = {'company': company},
+            n_results=15)
+        
+        reranked = self.reranking_function.rank(
+            user_message,
+            #[doc.page_content for doc in docs],
+            docs["documents"][0],
+            top_k=5,
+            return_documents=True
+        )
         
         data = self.data_collection.query(
             query_embeddings=[[0]],
@@ -96,5 +104,40 @@ class Pipeline:
             n_results=1
         )
 
-        return str(data["documents"][0])
+
+        context = ""
+        for doc in reranked:
+            context += doc["text"].replace('\n', ' ')
+            context += '\n'
+
+
+        payload = {
+            "model": "qwen2:1.5b",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": prompt,
+                },
+                {"role": "user", "content": f"DATA: {data["documents"][0]}\nCONTEXT: {context}\nQUERY: {user_message}"},
+            ],
+            "stream": body["stream"],
+        }
+
+        #https://github.com/ollama/ollama/blob/main/docs/api.md
+        try:
+            r = requests.post(
+                url=f"http://ollama:11434/v1/chat/completions",
+                json=payload,
+                stream=True
+            )
+
+            r.raise_for_status()
+
+            if body["stream"]:
+                return r.iter_lines()
+            else:
+                return r.json()
+        except Exception as e:
+            return f"Error: {e}"
+
 
