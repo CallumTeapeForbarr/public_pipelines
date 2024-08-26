@@ -132,7 +132,7 @@ class Pipeline:
         # return payload['messages'][1]['content']
 
         # api_url = 'http://ollama:11434/v1/chat/completions'
-        api_url = 'http://ollama:11434/api/generate'
+        api_url = 'http://ollama:11434/api/chat'
 
         #https://github.com/ollama/ollama/blob/main/docs/api.md
         try:
