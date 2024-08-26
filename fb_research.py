@@ -14,7 +14,6 @@ import numpy as np
 class Pipeline:
 
     def __init__(self):
-        #self.db = None
         self.collection = None
         self.client = None
         self.embedding_function = None
@@ -25,14 +24,11 @@ class Pipeline:
     async def on_startup(self):
 
         #models
-        #from langchain_huggingface import HuggingFaceEmbeddings #embedding model
         from sentence_transformers import CrossEncoder  #reranking model
         from sentence_transformers import SentenceTransformer
 
         #imports for vectordb
         import chromadb
-        #from langchain_community.vectorstores import Chroma
-        # from langchain_chroma import Chroma
 
         EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
         RERANKING_MODEL = "BAAI/bge-reranker-large"
@@ -41,17 +37,9 @@ class Pipeline:
         # global client, embedding_function, db, reranking_function, model
         #https://docs.trychroma.com/reference/py-client
         self.client = chromadb.HttpClient(host="chroma",port="8000", ssl=False)
-        self.collection = self.client.get_or_create_collection(name="research")
+        self.research_collection = self.client.get_or_create_collection(name="research")
+        self.data_collection = self.client.get_or_create_collection(name='data')
 
-        #https://api.python.langchain.com/en/latest/embeddings/langchain_huggingface.embeddings.huggingface.HuggingFaceEmbeddings.html
-        #self.embedding_function = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-
-        #https://python.langchain.com/v0.2/docs/integrations/vectorstores/chroma/
-        # self.db = Chroma(
-        #     client=self.client,
-        #     collection_name="research",
-        #     embedding_function=self.embedding_function,
-        # )
 
         self.embedding_function = SentenceTransformer(
             EMBEDDING_MODEL
@@ -95,35 +83,24 @@ class Pipeline:
                 2. Try to answer in one or two concise paragraphs
             """
         
-        company_list = np.array(['OCA', 'IKE', 'IPL', 'TWR', 'MHM', 'FRW', 'SML', 'CVT', 'KPG', 'NPH', 'AIR', 'AFT', 'HLG', 'ARV', 'VSL', 'RAD', 'WIN', 'SKO', 'SCL', 'PEB', 'ATM', 'VHP', 'NZM', 'PCT', 'RAK', 'SCT', 'TRA'])
-
         company, query = user_message.split(';')
 
         embedded_query=self.embedding_function.encode([query])
 
-
-        """
-        FOR ONE HOT ENCODING COMPANY INTO EMBEDDING
-        embedding = embedding[0]
-
-        cond = (company_list == company)
-        company_encode = np.where(cond,1,0)
-
-        print(company_encode)
-
-        company_embed = np.concatenate([np.full(len(embedding), fill_value=0), company_encode])
-        text_embed = np.concatenate([embedding, np.full(len(company_encode), fill_value=0)])
-
-        embedded_query = [(company_embed+text_embed).tolist()]
-
-        # embedded_query = self.embedding_function.encode([user_message])
-        """
-
-        docs = self.collection.query(
+        docs = self.research_collection.query(
             query_embeddings=embedded_query,
             include=["documents","distances","metadatas"],
             where = {'company': company},
             n_results=15)
+        
+        data = self.data_collection.query(
+            query_embeddings=[0],
+            include=["documents"],
+            where = {'company': company},
+            n_results=1
+        )
+
+        return data
 
         reranked = self.reranking_function.rank(
             user_message,
@@ -138,7 +115,6 @@ class Pipeline:
             context += doc["text"].replace('\n', ' ')
             context += '\n'
 
-
         payload = {
             "model": "qwen2:1.5b",
             "messages": [
@@ -146,7 +122,7 @@ class Pipeline:
                     "role": "system",
                     "content": prompt,
                 },
-                {"role": "user", "content": f"CONTEXT: {context}\nQUERY: {user_message}"},
+                {"role": "user", "content": f"DATA: {data["documents"][0]}, CONTEXT: {context}\nQUERY: {user_message}"},
             ],
             "stream": body["stream"],
         }
@@ -155,7 +131,6 @@ class Pipeline:
         try:
             r = requests.post(
                 url=f"http://ollama:11434/v1/chat/completions",
-                options = {'num_ctx': 100},
                 json=payload,
                 stream=True
             )
@@ -168,5 +143,4 @@ class Pipeline:
                 return r.json()
         except Exception as e:
             return f"Error: {e}"
-
 
