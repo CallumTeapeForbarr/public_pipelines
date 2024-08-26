@@ -129,6 +129,8 @@ class Pipeline:
         }
 
 
+        return payload['messages'][1]['content']
+
         #https://github.com/ollama/ollama/blob/main/docs/api.md
         try:
             r = requests.post(
