@@ -9,6 +9,7 @@ from typing import List, Union, Generator, Iterator
 import os
 import asyncio
 import requests
+import json
 
 class Pipeline:
 
@@ -145,7 +146,20 @@ class Pipeline:
             r.raise_for_status()
 
             if body["stream"]:
-                return r.iter_lines()
+                for line in r.iter_lines():
+                    if line:
+                        # Convert the line to a dictionary
+                        data = json.loads(line.decode('utf-8'))
+
+                        # Extract the content from the message
+                        if 'message' in data and 'content' in data['message']:
+                            yield data['message']['content']
+
+                        # Stop if the "done" flag is True
+                        if data.get('done', False):
+                            break
+                    else:
+                        return r.json()
             else:
                 return r.json()
         except Exception as e:
