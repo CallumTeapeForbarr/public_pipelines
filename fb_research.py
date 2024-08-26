@@ -43,14 +43,14 @@ class Pipeline:
         print(self.data_collection.count())
 
 
-        self.embedding_function = SentenceTransformer(
-            EMBEDDING_MODEL
-        )
+        # self.embedding_function = SentenceTransformer(
+        #     EMBEDDING_MODEL
+        # )
 
-        self.reranking_function = CrossEncoder(
-            RERANKING_MODEL,
-            trust_remote_code=True
-        )
+        # self.reranking_function = CrossEncoder(
+        #     RERANKING_MODEL,
+        #     trust_remote_code=True
+        # )
         pass
 
 
