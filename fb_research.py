@@ -90,11 +90,11 @@ class Pipeline:
         #     n_results=15)
         
         data = self.data_collection.query(
-            query_embeddings=[0],
+            query_embeddings=[[0]],
             include=["documents"],
             where = {'company': company},
             n_results=1
         )
 
-        return data["documents"][0]
+        return str(data["documents"][0])
 
