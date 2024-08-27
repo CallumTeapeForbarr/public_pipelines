@@ -67,14 +67,16 @@ class Pipeline:
                 You are an expert consultant helping financial advisors to get relevant information from market research reports.
 
                 Use the context given below to answer the advisors questions.
-        
-                The context will be a series of excerpts from market research reports. They may not belong to the same report. 
-                Please prioritise the most recent. Please prioritise actual data over forecast where applicable.
-                
+
+                The context will consist of a series of data in json format, and a series of excerpts from reports. 
+                Use the data to find values, statistics and facts, use the excerpts to find explanations, descriptions and speculation.
+                In cases where numbers reported in excerpts differ from numbers in the data section, assume that data section contains the true values.
+
                 Constraints:
                 1. Only use the context given to answer.
                 2. Do not make any statements which aren't verifiable from this context. 
-                2. Try to answer in one or two concise paragraphs
+                3. Answer in one or two concise paragraphs
+                4. Do not make any references to the context which was given. Write as though you are explaining without the documents at hand.
             """
         
         company, query = user_message.split(';')
@@ -123,7 +125,7 @@ class Pipeline:
                 },
                 {
                     "role": "user", 
-                    "content": f"DATA: {facts}\nCONTEXT: {context}\nQUERY: {user_message}"
+                    "content": f"DATA: {facts}\EXCERPTS: {context}\nQUERY: {user_message}"
                 }
             ],
             "stream": body["stream"]
