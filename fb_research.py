@@ -129,7 +129,7 @@ class Pipeline:
 
         #PRUNING HISTORY
         if len(self.conversation) > 5:
-            self.conversation = self.conversation[0] + self.conversation[-4:]
+            self.conversation = [self.conversation[0]] + self.conversation[-4:]
 
 
         messages = copy.deepcopy(self.conversation)
