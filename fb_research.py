@@ -90,7 +90,7 @@ class Pipeline:
         ) -> Union[str, Generator, Iterator]:
         # This is where you can add your custom RAG pipeline.
         # Typically, you would retrieve relevant information from your knowledge base and synthesize it to generate a response.
-        
+        print(messages)
         company, query = user_message.split(';')
 
         embedded_query=self.embedding_function.encode([query])
@@ -125,7 +125,7 @@ class Pipeline:
             context += '\n'
 
 
-        print(len(self.conversation))
+        # print(len(self.conversation))
 
         #PRUNING HISTORY
         if len(self.conversation) > 5:
@@ -176,7 +176,7 @@ class Pipeline:
             }
         )
 
-        print(self.conversation)
+        # print(self.conversation)
 
         self.conversation.append(
             {
