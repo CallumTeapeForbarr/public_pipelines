@@ -20,6 +20,7 @@ class Pipeline:
         self.embedding_function = None
         self.reranking_function = None
         self.model = None
+        self.conversation = None
 
 
     async def on_startup(self):
@@ -49,19 +50,7 @@ class Pipeline:
             RERANKING_MODEL,
             trust_remote_code=True
         )
-        pass
 
-
-    async def on_shutdown(self):
-        # This function is called when the server is stopped.
-        pass
-
-
-    def pipe(
-        self, user_message: str, model_id: str, messages: List[dict], body: dict
-        ) -> Union[str, Generator, Iterator]:
-        # This is where you can add your custom RAG pipeline.
-        # Typically, you would retrieve relevant information from your knowledge base and synthesize it to generate a response.
 
         prompt = """
                 You are an expert consultant helping financial advisors to get relevant information from market research reports.
@@ -78,6 +67,26 @@ class Pipeline:
                 3. Answer in one or two concise paragraphs
                 4. Do not make any references to the context which was given. Write as though you are explaining without the documents at hand.
             """
+
+        self.conversation = [
+            {
+                'role': 'system',
+                "content": prompt
+            }
+        ]
+        pass
+
+
+    async def on_shutdown(self):
+        # This function is called when the server is stopped.
+        pass
+
+
+    def pipe(
+        self, user_message: str, model_id: str, messages: List[dict], body: dict
+        ) -> Union[str, Generator, Iterator]:
+        # This is where you can add your custom RAG pipeline.
+        # Typically, you would retrieve relevant information from your knowledge base and synthesize it to generate a response.
         
         company, query = user_message.split(';')
 
@@ -113,24 +122,58 @@ class Pipeline:
             context += '\n'
 
 
+        messages = self.conversation
+        
+        messages.append(
+                {
+                    "role": "user", 
+                    "content": f"DATA: {facts}\EXCERPTS: {context}\nQUERY: {user_message}"
+                }
+        )
+
+        # payload = {
+        #     "model": "qwen2:1.5b",
+        #     "options": {
+        #         "num_ctx": 4096
+        #     },
+        #     "messages": [
+        #         {
+        #             "role": "system",
+        #             "content": prompt
+        #         },
+        #         {
+        #             "role": "user", 
+        #             "content": f"DATA: {facts}\EXCERPTS: {context}\nQUERY: {user_message}"
+        #         }
+        #     ],
+        #     "stream": body["stream"]
+        # }
+
         payload = {
             "model": "qwen2:1.5b",
             "options": {
                 "num_ctx": 4096
             },
-            "messages": [
-                {
-                    "role": "system",
-                    "content": prompt
-                },
-                {
-                    "role": "user", 
-                    "content": f"DATA: {facts}\EXCERPTS: {context}\nQUERY: {user_message}"
-                }
-            ],
+            "messages": messages,
             "stream": body["stream"]
         }
 
+
+        self.conversation.append(
+            {
+                'role': 'user',
+                'content': user_message
+            }
+        )
+
+        print(self.conversation)
+        
+        self.conversation.append(
+            {
+                'role': 'assistant',
+                'content': ''
+            }
+        )
 
         # return payload['messages'][1]['content']
 
@@ -155,6 +198,7 @@ class Pipeline:
 
                         # Extract the content from the message
                         if 'message' in data and 'content' in data['message']:
+                            self.conversation[-1]['content']+=data['message']['content']
                             yield data['message']['content']
 
                         # Stop if the "done" flag is True
