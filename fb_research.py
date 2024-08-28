@@ -96,7 +96,7 @@ class Pipeline:
         facts = data["documents"][0][0]
 
         context = ''
-        sources = ''
+        sources = []
 
         for ranking in reranked:
             context += docs['metadatas'][0][ranking['corpus_id']]['date']
@@ -104,8 +104,11 @@ class Pipeline:
             context += ranking['text']
             context += '\n\n'
 
-            sources += docs['metadatas'][0][ranking['corpus_id']]['source'].split('/')[-1].split('.')[0]
+            sources.append(docs['metadatas'][0][ranking['corpus_id']]['source'].split('/')[-1].split('.')[0])
             sources +='\n'
+
+        sources = '\n'.join(list(set(sources)))
+
 
 
         prompt = """
