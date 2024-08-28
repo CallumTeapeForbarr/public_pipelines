@@ -104,7 +104,7 @@ class Pipeline:
             context += ranking['text']
             context += '\n\n'
 
-            sources += docs['metadatas'][0][ranking['corpus_id']]['source']
+            sources += docs['metadatas'][0][ranking['corpus_id']]['source'].split('/')[-1].split('.')[0]
             sources +='\n'
 
 
@@ -180,7 +180,7 @@ class Pipeline:
 
                         # Stop if the "done" flag is True
                         if data.get('done', False):
-                            yield(f"\n\n{sources}")
+                            yield(f"\n\n\n\n{sources}")
                             break
                     else:
                         return r.json()
