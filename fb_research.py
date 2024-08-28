@@ -105,9 +105,10 @@ class Pipeline:
             context += '\n\n'
 
             sources.append(docs['metadatas'][0][ranking['corpus_id']]['source'].split('/')[-1].split('.')[0])
-            sources +='\n'
 
-        sources = '\n'.join(list(set(sources)))
+
+        deduped_sources = list(set(sources))
+        source_text = '\n'.join(deduped_sources)
 
 
 
@@ -183,7 +184,7 @@ class Pipeline:
 
                         # Stop if the "done" flag is True
                         if data.get('done', False):
-                            yield(f"\n\n\n\n{sources}")
+                            yield(f"\n\n\n\n{source_text}")
                             break
                     else:
                         return r.json()
