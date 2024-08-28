@@ -122,8 +122,6 @@ class Pipeline:
 
         convo = convo[:-1]
 
-        print(convo)
-
         convo.insert(0,
                      {
                          'role': 'system',
@@ -136,6 +134,8 @@ class Pipeline:
                     "content": f"DATA: {facts}\EXCERPTS: {context}\nQUERY: {user_message}"
                 }
         )
+
+        print(convo)
 
         # payload = {
         #     "model": "qwen2:1.5b",
