@@ -83,6 +83,8 @@ class Pipeline:
             top_k=5,
             return_documents=True
         )
+
+        print(reranked)
         
         data = self.data_collection.query(
             query_embeddings=[[0]],
@@ -93,15 +95,16 @@ class Pipeline:
 
         facts = data["documents"][0][0]
 
-        context = ""
-        for doc in reranked:
-            context += doc["text"].replace('\n', ' ')
+        context = ''
+
+        for ranking in reranked:
+            context += docs['metadatas'][0][ranking['corpus_id']]['date']
             context += '\n'
+            context += ranking['text']
+            context += '\n\n'
 
 
         prompt = """
-                Your name is Sarah.
-
                 You are an expert consultant helping financial advisors to get relevant information from market research reports.
 
                 Use the context given below to answer the advisors questions.
@@ -136,24 +139,6 @@ class Pipeline:
         )
 
         print(convo)
-
-        # payload = {
-        #     "model": "qwen2:1.5b",
-        #     "options": {
-        #         "num_ctx": 4096
-        #     },
-        #     "messages": [
-        #         {
-        #             "role": "system",
-        #             "content": prompt
-        #         },
-        #         {
-        #             "role": "user", 
-        #             "content": f"DATA: {facts}\EXCERPTS: {context}\nQUERY: {user_message}"
-        #         }
-        #     ],
-        #     "stream": body["stream"]
-        # }
 
         payload = {
             "model": "qwen2:1.5b",
@@ -191,6 +176,7 @@ class Pipeline:
 
                         # Stop if the "done" flag is True
                         if data.get('done', False):
+                            yield("\n\njust testing")
                             break
                     else:
                         return r.json()
