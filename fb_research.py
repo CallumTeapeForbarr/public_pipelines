@@ -10,6 +10,7 @@ import os
 import asyncio
 import requests
 import json
+import copy
 
 class Pipeline:
 
@@ -122,7 +123,7 @@ class Pipeline:
             context += '\n'
 
 
-        messages = self.conversation
+        messages = copy.deepcopy(self.conversation)
         
         messages.append(
                 {
@@ -167,7 +168,7 @@ class Pipeline:
         )
 
         print(self.conversation)
-        
+
         self.conversation.append(
             {
                 'role': 'assistant',
