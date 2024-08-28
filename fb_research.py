@@ -96,12 +96,16 @@ class Pipeline:
         facts = data["documents"][0][0]
 
         context = ''
+        sources = ''
 
         for ranking in reranked:
             context += docs['metadatas'][0][ranking['corpus_id']]['date']
             context += '\n'
             context += ranking['text']
             context += '\n\n'
+
+            sources += docs['metadatas'][0][ranking['corpus_id']]['source']
+            sources +='\n'
 
 
         prompt = """
@@ -176,7 +180,7 @@ class Pipeline:
 
                         # Stop if the "done" flag is True
                         if data.get('done', False):
-                            yield("\n\njust testing")
+                            yield(f"\n\n{sources}")
                             break
                     else:
                         return r.json()
