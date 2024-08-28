@@ -125,6 +125,13 @@ class Pipeline:
             context += '\n'
 
 
+        print(len(self.conversation))
+
+        #PRUNING HISTORY
+        if len(self.conversation) > 5:
+            self.conversation = self.conversation[0] + self.conversation[-4:]
+
+
         messages = copy.deepcopy(self.conversation)
         
         messages.append(
