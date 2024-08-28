@@ -52,31 +52,6 @@ class Pipeline:
             trust_remote_code=True
         )
 
-
-        prompt = """
-                Your name is Sarah.
-
-                You are an expert consultant helping financial advisors to get relevant information from market research reports.
-
-                Use the context given below to answer the advisors questions.
-
-                The context will consist of a series of data in json format, and a series of excerpts from reports. 
-                Use the data to find values, statistics and facts, use the excerpts to find explanations, descriptions and speculation.
-                In cases where numbers reported in excerpts differ from numbers in the data section, assume that data section contains the true values.
-
-                Constraints:
-                1. Only use the context given to answer.
-                2. Do not make any statements which aren't verifiable from this context. 
-                3. Answer in one or two concise paragraphs
-                4. Do not make any references to the context which was given. Write as though you are explaining without the documents at hand.
-            """
-
-        self.conversation = [
-            {
-                'role': 'system',
-                "content": prompt
-            }
-        ]
         pass
 
 
@@ -90,7 +65,6 @@ class Pipeline:
         ) -> Union[str, Generator, Iterator]:
         # This is where you can add your custom RAG pipeline.
         # Typically, you would retrieve relevant information from your knowledge base and synthesize it to generate a response.
-        print(messages)
         company, query = user_message.split(';')
 
         embedded_query=self.embedding_function.encode([query])
@@ -125,16 +99,38 @@ class Pipeline:
             context += '\n'
 
 
-        # print(len(self.conversation))
+        prompt = """
+                Your name is Sarah.
 
-        #PRUNING HISTORY
-        if len(self.conversation) > 5:
-            self.conversation = [self.conversation[0]] + self.conversation[-4:]
+                You are an expert consultant helping financial advisors to get relevant information from market research reports.
+
+                Use the context given below to answer the advisors questions.
+
+                The context will consist of a series of data in json format, and a series of excerpts from reports. 
+                Use the data to find values, statistics and facts, use the excerpts to find explanations, descriptions and speculation.
+                In cases where numbers reported in excerpts differ from numbers in the data section, assume that data section contains the true values.
+
+                Constraints:
+                1. Only use the context given to answer.
+                2. Do not make any statements which aren't verifiable from this context. 
+                3. Answer in one or two concise paragraphs
+                4. Do not make any references to the context which was given. Write as though you are explaining without the documents at hand.
+            """
 
 
-        messages = copy.deepcopy(self.conversation)
+        convo = copy.deepcopy(messages)
+
+        convo = convo[:-1]
+
+        print(convo)
+
+        convo.insert(0,
+                     {
+                         'role': 'system',
+                         'content': prompt
+                     })
         
-        messages.append(
+        convo.append(
                 {
                     "role": "user", 
                     "content": f"DATA: {facts}\EXCERPTS: {context}\nQUERY: {user_message}"
@@ -164,26 +160,9 @@ class Pipeline:
             "options": {
                 "num_ctx": 4096
             },
-            "messages": messages,
+            "messages": convo,
             "stream": body["stream"]
         }
-
-
-        self.conversation.append(
-            {
-                'role': 'user',
-                'content': user_message
-            }
-        )
-
-        # print(self.conversation)
-
-        self.conversation.append(
-            {
-                'role': 'assistant',
-                'content': ''
-            }
-        )
 
         # return payload['messages'][1]['content']
 
@@ -208,7 +187,6 @@ class Pipeline:
 
                         # Extract the content from the message
                         if 'message' in data and 'content' in data['message']:
-                            self.conversation[-1]['content']+=data['message']['content']
                             yield data['message']['content']
 
                         # Stop if the "done" flag is True
