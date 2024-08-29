@@ -101,14 +101,17 @@ class Pipeline:
         )
 
         
-        data = self.data_collection.query(
-            query_embeddings=[[0]],
-            include=["documents"],
-            where = {'company': company},
-            n_results=1
-        )
+        try:
+            data = self.data_collection.query(
+                query_embeddings=[[0]],
+                include=["documents"],
+                where = {'company': company},
+                n_results=1
+            )
 
-        facts = data["documents"][0][0]
+            facts = data["documents"][0][0]
+        except:
+            facts = "no data found"
 
         context = ''
         sources = []
