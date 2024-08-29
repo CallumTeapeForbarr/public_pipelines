@@ -65,16 +65,28 @@ class Pipeline:
         ) -> Union[str, Generator, Iterator]:
         # This is where you can add your custom RAG pipeline.
         # Typically, you would retrieve relevant information from your knowledge base and synthesize it to generate a response.
-        company, query = user_message.split(';')
+        if ';' not in user_message:
+            query = user_message
+
+        else:
+            company, query = user_message.split(';')
 
         embedded_query=self.embedding_function.encode([query])
 
-        docs = self.research_collection.query(
-            query_embeddings=embedded_query,
-            include=["documents","distances","metadatas"],
-            where = {'company': company},
-            n_results=15
-        )
+        if not company is None:
+            docs = self.research_collection.query(
+                query_embeddings=embedded_query,
+                include=["documents","distances","metadatas"],
+                where = {'company': company},
+                n_results=15
+            )
+        
+        else:
+            docs = self.research_collection.query(
+                query_embeddings=embedded_query,
+                include=["documents","distances","metadatas"],
+                n_results=15
+            )
         
         reranked = self.reranking_function.rank(
             user_message,
