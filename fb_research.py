@@ -84,7 +84,6 @@ class Pipeline:
             return_documents=True
         )
 
-        print(reranked)
         
         data = self.data_collection.query(
             query_embeddings=[[0]],
@@ -146,7 +145,6 @@ class Pipeline:
                 }
         )
 
-        print(convo)
 
         payload = {
             "model": "qwen2:1.5b",
@@ -157,9 +155,9 @@ class Pipeline:
             "stream": body["stream"]
         }
 
-        # return payload['messages'][1]['content']
+        print(payload['messages'][1]['content'])
 
-        # api_url = 'http://ollama:11434/v1/chat/completions'
+
         api_url = 'http://ollama:11434/api/chat'
 
         #https://github.com/ollama/ollama/blob/main/docs/api.md
