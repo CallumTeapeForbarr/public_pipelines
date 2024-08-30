@@ -82,21 +82,21 @@ class Pipeline:
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
                 where = {'company': company},
-                n_results=15
+                n_results=30
             )
         
         else:
             docs = self.research_collection.query(
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
-                n_results=15
+                n_results=30
             )
         
         reranked = self.reranking_function.rank(
             user_message,
             #[doc.page_content for doc in docs],
             docs["documents"][0],
-            top_k=5,
+            top_k=10,
             return_documents=True
         )
 
