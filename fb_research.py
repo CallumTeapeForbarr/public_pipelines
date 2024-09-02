@@ -11,12 +11,15 @@ import asyncio
 import requests
 import json
 import copy
+import math
+from datetime import datetime
 
 class Pipeline:
 
     def __init__(self):
         self.research_collection = None
         self.data_collection = None
+        self.time_collection = None
         self.client = None
         self.embedding_function = None
         self.reranking_function = None
@@ -25,6 +28,8 @@ class Pipeline:
 
 
     async def on_startup(self):
+
+        import numpy as np
 
         #models
         from sentence_transformers import CrossEncoder  #reranking model
@@ -42,6 +47,7 @@ class Pipeline:
         self.client = chromadb.HttpClient(host="chroma",port="8000", ssl=False)
         self.research_collection = self.client.get_or_create_collection(name="research")
         self.data_collection = self.client.get_or_create_collection(name="data")
+        self.time_collection = self.client.get_or_create_collection(name='time')
 
         self.embedding_function = SentenceTransformer(
             EMBEDDING_MODEL
@@ -66,36 +72,79 @@ class Pipeline:
         # This is where you can add your custom RAG pipeline.
         # Typically, you would retrieve relevant information from your knowledge base and synthesize it to generate a response.
 
+
+        date = '2024-09-01'
         company = None
         query = None
+
+
 
         if ';' not in user_message:
             query = user_message
 
         else:
-            company, query = user_message.split(';')
+            date, company, query = user_message.split(';')
+
+        date = datetime.strptime(date, '%Y-%m-%d')
+        the_big_bang = datetime(2020,1,1)
+        r = 1
+        z = (date - the_big_bang).days
+        compression = math.sqrt((16/3))
+        revs = z/365
+        vec = [r*math.cos(2*math.pi*revs), r*math.sin(2*math.pi*revs),  compression*revs]
+
 
         embedded_query=self.embedding_function.encode([query])
 
         if not company is None:
-            docs = self.research_collection.query(
+            text_rankings = self.research_collection.query(
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
                 where = {'company': company},
-                n_results=30
+                n_results=int(self.research_collection.count()/2)
+            )
+
+            time_rankings = self.time_collection.query(
+                query_embeddings=[vec],
+                include=["documents","distances","metadatas"],
+                where = {'company': company},
+                n_results=self.time_collection.count()
             )
         
         else:
             docs = self.research_collection.query(
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
-                n_results=30
+                n_results=int(self.research_collection.count()/2)
             )
+
+            time_rankings = self.time_collection.query(
+                query_embeddings=[vec],
+                include=["documents","distances","metadatas"],
+                n_results=self.time_collection.count()
+            )
+
+
+        time_distances = np.array(time_rankings['distances'][0])
+        time_distances_normalised = time_distances/np.max(time_distances)
+        time_dict = dict(zip(time_rankings['ids'][0], time_distances_normalised))
+
+        text_distances = np.array(text_rankings['distances'][0])
+        text_distances_normalised = text_distances/np.max(text_distances)
+        text_dict = dict(zip(text_rankings['ids'][0],text_distances_normalised))
+
+        combined = {}
+        for key in text_dict.keys():
+              combined[key] = text_dict[key] + time_dict[key]
+
+        ranking = dict(sorted(combined.items(), key=lambda item: item[1]))
+
+        docs = [self.research_collection.get(ids=[key]) for key in ranking.keys()[:30]]
         
         reranked = self.reranking_function.rank(
-            user_message,
-            #[doc.page_content for doc in docs],
-            docs["documents"][0],
+            query,
+            # docs["documents"][0],
+            docs,
             top_k=10,
             return_documents=True
         )
