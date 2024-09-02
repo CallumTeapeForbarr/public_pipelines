@@ -13,6 +13,7 @@ import json
 import copy
 import math
 from datetime import datetime
+import numpy as np
 
 class Pipeline:
 
@@ -28,8 +29,6 @@ class Pipeline:
 
 
     async def on_startup(self):
-
-        import numpy as np
 
         #models
         from sentence_transformers import CrossEncoder  #reranking model
