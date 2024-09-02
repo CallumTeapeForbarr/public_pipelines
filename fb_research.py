@@ -140,7 +140,7 @@ class Pipeline:
 
         ranking = dict(sorted(combined.items(), key=lambda item: item[1]))
 
-        return list(ranking.keys()[:5])
+        return list(ranking.keys())[:5]
 
 
     
