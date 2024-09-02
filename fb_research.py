@@ -85,7 +85,9 @@ class Pipeline:
         else:
             date, company, query = user_message.split(';')
 
-        date = datetime.strptime(date, '%Y-%m-%d')
+        print(date)
+
+        date = datetime.strptime(date.split('\n')[-1], '%Y-%m-%d')
         the_big_bang = datetime(2020,1,1)
         r = 1
         z = (date - the_big_bang).days
