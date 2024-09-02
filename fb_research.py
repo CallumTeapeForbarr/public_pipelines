@@ -140,6 +140,9 @@ class Pipeline:
 
         ranking = dict(sorted(combined.items(), key=lambda item: item[1]))
 
+
+        return str(ranking[:5])
+
         docs = [self.research_collection.get(ids=[key]) for key in list(ranking.keys())[:5]]
         
         reranked = self.reranking_function.rank(
