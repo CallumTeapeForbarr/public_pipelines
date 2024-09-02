@@ -143,6 +143,7 @@ class Pipeline:
         return list(ranking.keys())[:5]
 
 
+
     
 
         docs = [self.research_collection.get(ids=[key]) for key in list(ranking.keys())[:5]]
