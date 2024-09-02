@@ -141,13 +141,13 @@ class Pipeline:
 
         ranking = dict(sorted(combined.items(), key=lambda item: item[1]))
 
-        docs = [self.research_collection.get(ids=[key]) for key in ranking.keys()[:30]]
+        docs = [self.research_collection.get(ids=[key]) for key in ranking.keys()[:5]]
         
         reranked = self.reranking_function.rank(
             query,
             # docs["documents"][0],
             docs,
-            top_k=10,
+            top_k=5,
             return_documents=True
         )
 
