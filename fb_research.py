@@ -150,6 +150,7 @@ class Pipeline:
                 The context will consist of a series of data in json format, and a series of excerpts from reports. 
                 Use the data to find values, statistics and facts, use the excerpts to find explanations, descriptions and speculation.
                 In cases where numbers reported in excerpts differ from numbers in the data section, assume that data section contains the true values.
+                I repeat, for questions, about target price, EPS etc... use the values reported in the data section
 
                 Constraints:
                 1. Only use the context given to answer.
