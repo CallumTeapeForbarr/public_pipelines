@@ -92,7 +92,7 @@ class Pipeline:
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
                 where = {'company': company},
-                n_results=int(self.research_collection.count()/2)
+                n_results=15
             )
 
         #if not
@@ -100,15 +100,14 @@ class Pipeline:
             docs = self.research_collection.query(
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
-                n_results=int(self.research_collection.count()/2)
+                n_results=15
             )
-
 
 
         
         reranked = self.reranking_function.rank(
+            query,
             docs["documents"][0],
-            docs,
             top_k=5,
             return_documents=True
         )
