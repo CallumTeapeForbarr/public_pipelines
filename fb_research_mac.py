@@ -179,7 +179,7 @@ class Pipeline:
 
 
         payload = {
-            "model": "qwen2:1.5b",
+            "model": "llama3.1",
             "options": {
                 "num_ctx": 4096
             },
@@ -187,10 +187,10 @@ class Pipeline:
             "stream": body["stream"]
         }
 
-        print(payload['messages'][1]['content'])
+        print(payload)
 
 
-        api_url = 'http://ollama:11434/api/chat'
+        api_url = 'http://host.docker.internal:11434/api/chat'
 
         #https://github.com/ollama/ollama/blob/main/docs/api.md
         try:
