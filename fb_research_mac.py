@@ -50,7 +50,8 @@ class Pipeline:
         self.time_collection = self.client.get_or_create_collection(name='time')
 
         self.embedding_function = SentenceTransformer(
-            EMBEDDING_MODEL
+            EMBEDDING_MODEL,
+            trust_remote_code=True
         )
 
         # self.reranking_function = CrossEncoder(
