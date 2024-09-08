@@ -80,7 +80,7 @@ class Pipeline:
         print(payload['messages'][1]['content'])
 
 
-        api_url = 'http://ollama:11434/api/chat'
+        api_url = 'http://host.docker.internal:11434/api/chat'
 
         #https://github.com/ollama/ollama/blob/main/docs/api.md
         try:
