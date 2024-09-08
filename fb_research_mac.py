@@ -37,7 +37,8 @@ class Pipeline:
         #imports for vectordb
         import chromadb
 
-        EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
+        # EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
+        EMBEDDING_MODEL = "dunzhang/stella_en_400M_v5"
         RERANKING_MODEL = "BAAI/bge-reranker-large"
 
         # This function is called when the server is started.
@@ -52,10 +53,10 @@ class Pipeline:
             EMBEDDING_MODEL
         )
 
-        self.reranking_function = CrossEncoder(
-            RERANKING_MODEL,
-            trust_remote_code=True
-        )
+        # self.reranking_function = CrossEncoder(
+        #     RERANKING_MODEL,
+        #     trust_remote_code=True
+        # )
 
         pass
 
@@ -92,7 +93,7 @@ class Pipeline:
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
                 where = {'company': company},
-                n_results=15
+                n_results=5
             )
 
         #if not
@@ -100,18 +101,33 @@ class Pipeline:
             docs = self.research_collection.query(
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
-                n_results=15
+                n_results=5
             )
 
+        context = '\n'.join(docs['documents'][0])
 
         
-        reranked = self.reranking_function.rank(
-            query,
-            docs["documents"][0],
-            top_k=5,
-            return_documents=True
-        )
+        # reranked = self.reranking_function.rank(
+        #     query,
+        #     docs["documents"][0],
+        #     top_k=5,
+        #     return_documents=True
+        # )
 
+        # context = ''
+        # sources = []
+
+        # for ranking in reranked:
+        #     context += docs['metadatas'][0][ranking['corpus_id']]['date']
+        #     context += '\n'
+        #     context += ranking['text']
+        #     context += '\n\n'
+
+        #     sources.append(docs['metadatas'][0][ranking['corpus_id']]['source'].split('/')[-1].split('.')[0])
+
+
+        # deduped_sources = list(set(sources))
+        # source_text = '\n'.join(deduped_sources)
         
         try:
             data = self.data_collection.query(
@@ -124,21 +140,6 @@ class Pipeline:
             facts = data["documents"][0][0]
         except:
             facts = "no data found"
-
-        context = ''
-        sources = []
-
-        for ranking in reranked:
-            context += docs['metadatas'][0][ranking['corpus_id']]['date']
-            context += '\n'
-            context += ranking['text']
-            context += '\n\n'
-
-            sources.append(docs['metadatas'][0][ranking['corpus_id']]['source'].split('/')[-1].split('.')[0])
-
-
-        deduped_sources = list(set(sources))
-        source_text = '\n'.join(deduped_sources)
 
 
 
