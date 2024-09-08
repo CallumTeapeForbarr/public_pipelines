@@ -69,7 +69,7 @@ class Pipeline:
 
 
         payload = {
-            "model": "qwen2:1.5b",
+            "model": "llama3.1:latest",
             "options": {
                 "num_ctx": 4096
             },
@@ -81,6 +81,8 @@ class Pipeline:
 
 
         api_url = 'http://host.docker.internal:11434/api/chat'
+
+
 
         #https://github.com/ollama/ollama/blob/main/docs/api.md
         try:
