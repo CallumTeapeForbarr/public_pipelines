@@ -69,7 +69,7 @@ class Pipeline:
 
 
         payload = {
-            "model": "llama3.1:latest",
+            "model": "llama3.1",
             "options": {
                 "num_ctx": 4096
             },
@@ -77,7 +77,7 @@ class Pipeline:
             "stream": body["stream"]
         }
 
-        print(payload['messages'][1]['content'])
+        print(payload)
 
 
         api_url = 'http://host.docker.internal:11434/api/chat'
