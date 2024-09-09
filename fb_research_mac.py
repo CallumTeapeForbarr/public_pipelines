@@ -54,10 +54,10 @@ class Pipeline:
             trust_remote_code=True
         )
 
-        # self.reranking_function = CrossEncoder(
-        #     RERANKING_MODEL,
-        #     trust_remote_code=True
-        # )
+        self.reranking_function = CrossEncoder(
+            RERANKING_MODEL,
+            trust_remote_code=True
+        )
 
         pass
 
@@ -94,7 +94,7 @@ class Pipeline:
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
                 where = {'company': company},
-                n_results=5
+                n_results=15
             )
 
         #if not
@@ -102,33 +102,33 @@ class Pipeline:
             docs = self.research_collection.query(
                 query_embeddings=embedded_query,
                 include=["documents","distances","metadatas"],
-                n_results=5
+                n_results=15
             )
 
-        context = '\n'.join(docs['documents'][0])
+        # context = '\n'.join(docs['documents'][0])
 
         
-        # reranked = self.reranking_function.rank(
-        #     query,
-        #     docs["documents"][0],
-        #     top_k=5,
-        #     return_documents=True
-        # )
+        reranked = self.reranking_function.rank(
+            query,
+            docs["documents"][0],
+            top_k=5,
+            return_documents=True
+        )
 
-        # context = ''
-        # sources = []
+        context = ''
+        sources = []
 
-        # for ranking in reranked:
-        #     context += docs['metadatas'][0][ranking['corpus_id']]['date']
-        #     context += '\n'
-        #     context += ranking['text']
-        #     context += '\n\n'
+        for ranking in reranked:
+            context += docs['metadatas'][0][ranking['corpus_id']]['date']
+            context += '\n'
+            context += ranking['text']
+            context += '\n\n'
 
-        #     sources.append(docs['metadatas'][0][ranking['corpus_id']]['source'].split('/')[-1].split('.')[0])
+            sources.append(docs['metadatas'][0][ranking['corpus_id']]['source'].split('/')[-1].split('.')[0])
 
 
-        # deduped_sources = list(set(sources))
-        # source_text = '\n'.join(deduped_sources)
+        deduped_sources = list(set(sources))
+        source_text = '\n'.join(deduped_sources)
         
         try:
             data = self.data_collection.query(
