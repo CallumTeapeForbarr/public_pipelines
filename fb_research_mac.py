@@ -37,8 +37,8 @@ class Pipeline:
         #imports for vectordb
         import chromadb
 
-        # EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
-        EMBEDDING_MODEL = "dunzhang/stella_en_400M_v5"
+        EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
+        # EMBEDDING_MODEL = "dunzhang/stella_en_400M_v5"
         RERANKING_MODEL = "BAAI/bge-reranker-large"
 
         # This function is called when the server is started.
