@@ -86,6 +86,7 @@ class Pipeline:
             date_string, company, query = user_message.split(';')
 
 
+        print(date_string)
 
         """
         Method to give an embedding for dates into a helical space.
@@ -94,9 +95,10 @@ class Pipeline:
             1.  Continuous: reflects continuity of time.
             2.  Cyclical: the shape repeats every revolution, meaning relationships within each revolution (year) are comporable
             3.  Spacing: Can control how tightly wound the helix is to make points between years more or less similar
+
         """
         #parsing time input and choosing starting date as the first of 2020
-        date = datetime.strptime(date_string, '%Y-%m-%d')
+        date = datetime.strptime(date_string.strip(), '%Y-%m-%d')
         the_big_bang = datetime(2020,1,1)
 
         #choosing constants (r being radius, compression being the amount the curve travels in the z axis per revolution/how tightly wound it is)
@@ -223,8 +225,8 @@ class Pipeline:
                 The context will consist of a series of data in json format, and a series of excerpts from reports. 
                 Use the data to find values, statistics and facts, use the excerpts to find explanations, descriptions and speculation.
 
-                The user has provided a date: {date_str}. The excerpts provided will have been published close to this date. 
-                The exact publication date will be provided above each excerpt. Please prioritise excerpts which were published near the provided date {date_str}.
+                The user has provided a date: {date_string}. The excerpts provided will have been published close to this date. 
+                The exact publication date will be provided above each excerpt. Please prioritise excerpts which were published near the provided date {date_string}.
                 When using data from this period, please clearly indicate that the data is historic, and cite the period it pertains to.
         
                 The data in the data section will always be the most current. Always use this data if the user gives no indication that they want historic data.
