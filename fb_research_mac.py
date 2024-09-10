@@ -145,6 +145,8 @@ class Pipeline:
         text_distances_normalised = text_distances/np.max(text_distances)
         text_dict = dict(zip(text_rankings['ids'][0],text_distances_normalised))
 
+        print(time_dict)
+
 
         #combining the two rankings together
         combined = {}
