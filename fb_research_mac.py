@@ -83,11 +83,9 @@ class Pipeline:
             query = user_message
 
         else:
-            date_string, company, query = user_message.split(';')
+            date, company, query = user_message.split(';')
 
-
-        date_string = date_string.replace('\n','').strip()
-        print(date_string)
+        print(date)
 
         """
         Method to give an embedding for dates into a helical space.
@@ -99,7 +97,8 @@ class Pipeline:
 
         """
         #parsing time input and choosing starting date as the first of 2020
-        date = datetime.strptime(date_string, '%Y-%m-%d')
+
+        date = datetime.strptime(date.split('\n')[-1], '%Y-%m-%d')
         the_big_bang = datetime(2020,1,1)
 
         #choosing constants (r being radius, compression being the amount the curve travels in the z axis per revolution/how tightly wound it is)
