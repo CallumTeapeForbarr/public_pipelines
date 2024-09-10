@@ -54,10 +54,10 @@ class Pipeline:
             trust_remote_code=True
         )
 
-        self.reranking_function = CrossEncoder(
-            RERANKING_MODEL,
-            trust_remote_code=True
-        )
+        # self.reranking_function = CrossEncoder(
+        #     RERANKING_MODEL,
+        #     trust_remote_code=True
+        # )
 
         pass
 
@@ -224,10 +224,10 @@ class Pipeline:
                 Use the data to find values, statistics and facts, use the excerpts to find explanations, descriptions and speculation.
 
                 The user has provided a date: {date_str}. The excerpts provided will have been published close to this date. 
-                The exact publication date will be provided above each excerpt. Please prioritise information from the provided date {date_str}.
+                The exact publication date will be provided above each excerpt. Please prioritise excerpts which were published near the provided date {date_str}.
                 When using data from this period, please clearly indicate that the data is historic, and cite the period it pertains to.
         
-                The data in the data section will always be the most current.
+                The data in the data section will always be the most current. Always use this data if the user gives no indication that they want historic data.
 
                 Constraints:
                 1. Only use the context given to answer.
