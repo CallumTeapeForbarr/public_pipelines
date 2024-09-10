@@ -228,7 +228,7 @@ class Pipeline:
                 The exact publication date will be provided above each excerpt. Please prioritise excerpts which were published near the provided date {date_string}.
                 When using data from this period, please clearly indicate that the data is historic, and cite the period it pertains to.
         
-                The data in the data section will always be the most current. Always use this data if the user gives no indication that they want historic data.
+                The data in the data section will always be the most current. Always use this data when the user asks for current information. For example: what is our current 12 month target price.
 
                 Constraints:
                 1. Only use the context given to answer.
