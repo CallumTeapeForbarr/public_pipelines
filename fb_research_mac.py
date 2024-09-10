@@ -83,9 +83,8 @@ class Pipeline:
             query = user_message
 
         else:
-            date, company, query = user_message.split(';')
+            date_string, company, query = user_message.split(';')
 
-        print(date)
 
         """
         Method to give an embedding for dates into a helical space.
@@ -144,8 +143,6 @@ class Pipeline:
         text_distances = np.array(text_rankings['distances'][0])
         text_distances_normalised = text_distances/np.max(text_distances)
         text_dict = dict(zip(text_rankings['ids'][0],text_distances_normalised))
-
-        print(time_dict)
 
 
         #combining the two rankings together
@@ -268,7 +265,7 @@ class Pipeline:
             "stream": body["stream"]
         }
 
-        print(payload)
+        print(payload['messages'][-1]['content'])
 
 
         api_url = 'http://host.docker.internal:11434/api/chat'
